@@ -1,0 +1,15 @@
+cat > .gitignore <<'EOF'
+# Build results
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+
+# MonoGame
+*.mgcb.cache
+*.xnb
+
+# OS
+.DS_Store
+Thumbs.db
+EOF
