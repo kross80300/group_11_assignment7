@@ -21,6 +21,8 @@ public class Game1 : Game
     private int _currentLevel = 1;
     private const float LEVEL_DURATION = 40f;
 
+    private Spaceship spaceship;
+
     public Game1()
     {
         _graphics = new GraphicsDeviceManager(this);
@@ -47,14 +49,19 @@ public class Game1 : Game
     {
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _asteroidTexture = Content.Load<Texture2D>("textures/asteroid");
+        _spaceshipTexture = Content.Load<Texture2D>("textures/spaceshipTexture");
+        spaceship = new Spaceship(_spaceshipTexture, new Vector2(width / 2, height / 2), 5f);
     }
 
     protected override void Update(GameTime gameTime)
     {
+        KeyboardState k = Keyboard.GetState();
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
-            Keyboard.GetState().IsKeyDown(Keys.Escape))
+            k.IsKeyDown(Keys.Escape))
             Exit();
 
+        spaceship.Update(gameTime, k, height, width);
+        
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
         _levelTimer += deltaTime;
@@ -107,6 +114,7 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.Black);
 
         _spriteBatch.Begin();
+        spaceship.Draw(_spriteBatch);
         foreach (var asteroid in _asteroids)
         {
             asteroid.Draw(_spriteBatch);
