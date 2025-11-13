@@ -13,6 +13,16 @@ public class Asteroid
     int hitPoints = 3;
     float rotationAngle;
     float rotationSpeed;
+    
+    public Asteroid(Vector2 pos, Vector2 vel, Texture2D texture, float rotSpeed)
+    {
+        position = pos;
+        velocity = vel;
+        asteroidTexture = texture;
+        rotationSpeed = rotSpeed;
+        hitPoints = 3;
+        rotationAngle = 0f;
+    }
 
     public void Update(GameTime gameTime)
     {
@@ -40,7 +50,7 @@ public class Asteroid
             Color.White,
             rotationAngle,
             new Vector2(asteroidTexture.Width / 2f, asteroidTexture.Height / 2f),
-            1.0f,
+            0.2f,
             SpriteEffects.None,
             0f
         );
