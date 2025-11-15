@@ -22,6 +22,7 @@ public class Game1 : Game
     private const float LEVEL_DURATION = 40f;
 
     private Spaceship spaceship;
+    private Texture2D _spaceshipTexture;
 
     public Game1()
     {
@@ -50,7 +51,7 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _asteroidTexture = Content.Load<Texture2D>("textures/asteroid");
         _spaceshipTexture = Content.Load<Texture2D>("textures/spaceshipTexture");
-        spaceship = new Spaceship(_spaceshipTexture, new Vector2(width / 2, height / 2), 5f);
+        spaceship = new Spaceship(_spaceshipTexture, new Vector2(_spaceshipTexture.Width / 2f, _spaceshipTexture.Height / 2f), 5f);
     }
 
     protected override void Update(GameTime gameTime)
@@ -60,7 +61,7 @@ public class Game1 : Game
             k.IsKeyDown(Keys.Escape))
             Exit();
 
-        spaceship.Update(gameTime, k, height, width);
+        spaceship.Update(gameTime, k, _spaceshipTexture.Height, _spaceshipTexture.Width);
         
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
