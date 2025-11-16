@@ -13,13 +13,14 @@ public class Game1 : Game
     private Texture2D _asteroidTexture;
     
     private List<Asteroid> _asteroids;
+    private List<Asteroid> _asteroidsToRemove = new List<Asteroid>();
     private Random _random;
     private float _asteroidSpawnTimer;
     private float _asteroidSpawnInterval = 2.5f;
     
     private float _levelTimer;
     private int _currentLevel = 1;
-    private const float LEVEL_DURATION = 40f;
+    private const float LEVEL_DURATION = 20f;
 
     private Spaceship spaceship;
     private Texture2D _spaceshipTexture;
@@ -61,7 +62,11 @@ public class Game1 : Game
             k.IsKeyDown(Keys.Escape))
             Exit();
 
-        spaceship.Update(gameTime, k, _spaceshipTexture.Height, _spaceshipTexture.Width);
+        spaceship.Update(gameTime, k, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
+
+
+        //if (k.IsKeyDown(Keys.Space))
+        //    spaceship.Shoot(projectiles, projectileTexture, gameTime);
         
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
@@ -91,6 +96,17 @@ public class Game1 : Game
             }
         }
 
+       foreach (var a in _asteroids)
+        {
+            if (spaceship.GetBounds().Intersects(a.GetBoundingBox()))
+            {
+                spaceship.LoseLife();
+                _asteroidsToRemove.Add(a);
+            }
+        } 
+        
+        _asteroids.RemoveAll(a => _asteroidsToRemove.Contains(a));
+        _asteroidsToRemove.Clear();
         base.Update(gameTime);
     }
 
