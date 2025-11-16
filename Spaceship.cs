@@ -15,7 +15,7 @@ public class Spaceship
     private int explosionFrameY = 285;
     private int lives;
     public float speed = 5f;
-    private float gunCooldown = 0.5f;
+    private float gunCooldown = 0.4f;
     private float lastShotTime = 0f;
     private int explosionFrames = 7;
     private int currentExplosionFrame = -1;
@@ -28,7 +28,7 @@ public class Spaceship
         lives = 5;
     }
 
-    public void Update(GameTime time, KeyboardState keyboardState, int height, int width)
+    public void Update(GameTime time, KeyboardState keyboardState, int width, int height)
     {
         lastShotTime += (float)time.ElapsedGameTime.TotalSeconds;
         if (lives <= 0)
@@ -71,6 +71,11 @@ public class Spaceship
         return lives;
     }
 
+    public Rectangle GetBounds()
+    {
+        return new Rectangle((int)position.X + 20, (int)position.Y + 25, 60, 50);
+    }
+
     public void LoseLife()
     {
         lives = Math.Max(0, lives - 1);
@@ -100,10 +105,6 @@ public class Spaceship
         {
             lastShotTime = 0f;
             projectiles.Add(new Projectile(pixel, new Vector2(position.X + 48, position.Y + 10), new Vector2(0, -10f)));
-        }
-        else
-        {
-            Console.WriteLine("Gun is cooling down!");
         }
     }
 }
