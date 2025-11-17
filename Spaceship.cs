@@ -25,7 +25,7 @@ public class Spaceship
         this.spriteSheet = spriteSheet;
         this.position = position;
         this.speed = speed;
-        lives = 5;
+        lives = 3;
     }
 
     public void Update(GameTime time, KeyboardState keyboardState, int width, int height)
@@ -108,3 +108,4 @@ public class Spaceship
         }
     }
 }
+
