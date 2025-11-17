@@ -62,19 +62,30 @@ public class Game1 : Game
         spaceship = new Spaceship(_spaceshipTexture, new Vector2(_spaceshipTexture.Width / 2f, _spaceshipTexture.Height / 2f), 5f);
     }
 
+
+
     protected override void Update(GameTime gameTime)
     {
         KeyboardState k = Keyboard.GetState();
+        
         if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
             k.IsKeyDown(Keys.Escape))
             Exit();
+        
+        if (_gameOver)
+        {
+            return;
+        }
 
         spaceship.Update(gameTime, k, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
-
-
-        //if (k.IsKeyDown(Keys.Space))
-        //    spaceship.Shoot(projectiles, projectileTexture, gameTime);
         
+        if (spaceship.GetLives() <= 0)
+        {
+            _gameOver = true;
+            _previousKeyboardState = k;
+            return;
+        }
+
         float deltaTime = (float)gameTime.ElapsedGameTime.TotalSeconds;
         
         _levelTimer += deltaTime;
@@ -103,7 +114,7 @@ public class Game1 : Game
             }
         }
 
-       foreach (var a in _asteroids)
+        foreach (var a in _asteroids)
         {
             if (spaceship.GetBounds().Intersects(a.GetBoundingBox()))
             {
@@ -138,13 +149,82 @@ public class Game1 : Game
         GraphicsDevice.Clear(Color.Black);
 
         _spriteBatch.Begin();
-        spaceship.Draw(_spriteBatch);
-        foreach (var asteroid in _asteroids)
+        
+        if (!_gameOver)
         {
-            asteroid.Draw(_spriteBatch);
+            spaceship.Draw(_spriteBatch);
+            foreach (var asteroid in _asteroids)
+            {
+                asteroid.Draw(_spriteBatch);
+            }
+
+            DrawHearts();
         }
+        else
+        {
+            DrawGameOverScreen();
+        }
+        
         _spriteBatch.End();
 
         base.Draw(gameTime);
+    }
+
+    private void DrawHearts()
+    {
+        int heartSize = 30;
+        int heartSpacing = 40;
+        int startX = 20;
+        int startY = 20;
+        int maxLives = 3;
+        int currentLives = spaceship.GetLives();
+        
+        for (int i = 0; i < maxLives; i++)
+        {
+            Vector2 position = new Vector2(startX + (i * heartSpacing), startY);
+            Color heartColor = i < currentLives ? Color.Red : Color.Gray;
+            
+            _spriteBatch.Draw(
+                _heartTexture,
+                position,
+                null,
+                heartColor,
+                0f,
+                Vector2.Zero,
+                1.5f,
+                SpriteEffects.None,
+                0f
+            );
+        }
+    }
+
+    private void DrawGameOverScreen()
+    {
+        int screenWidth = _graphics.PreferredBackBufferWidth;
+        int screenHeight = _graphics.PreferredBackBufferHeight;
+        
+        Texture2D pixel = new Texture2D(GraphicsDevice, 1, 1);
+        pixel.SetData(new[] { Color.White });
+        _spriteBatch.Draw(
+            pixel,
+            new Rectangle(0, 0, screenWidth, screenHeight),
+            Color.Black * 0.7f
+        );
+        
+        string gameOverText = "GAME OVER";
+        Vector2 gameOverSize = _font.MeasureString(gameOverText);
+        Vector2 gameOverPos = new Vector2(
+            (screenWidth - gameOverSize.X) / 2f,
+            screenHeight / 2f - 100
+        );
+        _spriteBatch.DrawString(_font, gameOverText, gameOverPos, Color.Red);
+
+        string levelText = $"Level Reached: {_currentLevel}";
+        Vector2 levelSize = _font.MeasureString(levelText);
+        Vector2 levelPos = new Vector2(
+            (screenWidth - levelSize.X) / 2f,
+            screenHeight / 2f - 20
+        );
+        _spriteBatch.DrawString(_font, levelText, levelPos, Color.White);
     }
 }
