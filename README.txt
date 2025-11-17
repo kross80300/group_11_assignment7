@@ -1,0 +1,1 @@
+﻿In order to run the game, open Game1.cs in your IDE and hit Run. To play the game, use the arrow keys to move the spaceship and press the Space bar to shoot projectiles at incoming asteroids
