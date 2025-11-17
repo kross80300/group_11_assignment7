@@ -4,10 +4,11 @@ The Spaceship Class (Spencer)
 	The spaceship class is what the user controls and uses a spritesheet to show different depictions depending on what direction the ship is moving, and shows an explosion animation on death. It handles the user movement and lives left and initiating the explosion animation from the update method.
 
 The Projectile Class (Anunay)
-	The projectile class handles the projectiles that the laser canon fires. It creates a projectile instance that then checks for asteroid collisions.
+	The projectile class contains the projectile textures and handles the projectiles that the laser canon fires. It creates a projectile instance that then checks for asteroid collisions.
 
 The Asteroid Class and GUI (Katie)
 	The asteroid class contains the asteroid texture and getbounds methods to check for collisions between the asteroids and the spaceship. These asteroids fall from the top of the screen with different spins and are stored in a list in game1. They are also removed when they either hit the spaceship or leave the screen. There are hearts on screen to represent player lives and the game over screen also shows the level that the player reached
 
 The main challenges seemed to be with collision calculations, especially since the textures may be scaled or non square, which complicates where exactly the hitbox should be.
+
 
