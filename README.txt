@@ -1,0 +1,1 @@
+﻿To run the program and view the animation, go to Game1.cs and click the run button.
