@@ -13,6 +13,7 @@ public class Asteroid
     int hitPoints = 3;
     float rotationAngle;
     float rotationSpeed;
+    float scale = 0.2f;
     
     public Asteroid(Vector2 pos, Vector2 vel, Texture2D texture, float rotSpeed)
     {
@@ -20,7 +21,7 @@ public class Asteroid
         velocity = vel;
         asteroidTexture = texture;
         rotationSpeed = rotSpeed;
-        hitPoints = 3;
+        hitPoints = 1;  // Changed from 3 to 1 for one-hit destruction
         rotationAngle = 0f;
     }
 
@@ -32,13 +33,6 @@ public class Asteroid
 
         if (rotationAngle > MathHelper.TwoPi)
             rotationAngle -= MathHelper.TwoPi;
-
-        boundingBox = new Rectangle(
-            (int)(position.X - asteroidTexture.Width / 2f),
-            (int)(position.Y - asteroidTexture.Height / 2f),
-            asteroidTexture.Width,
-            asteroidTexture.Height
-        );
     }
 
     public void Draw(SpriteBatch spriteBatch)
@@ -50,7 +44,7 @@ public class Asteroid
             Color.White,
             rotationAngle,
             new Vector2(asteroidTexture.Width / 2f, asteroidTexture.Height / 2f),
-            0.2f,
+            scale,
             SpriteEffects.None,
             0f
         );
@@ -64,35 +58,33 @@ public class Asteroid
             return true;
         }
         return false;
-
     }
 
     public Rectangle GetBoundingBox()
     {
-        int width = asteroidTexture.Width;
-        int height = asteroidTexture.Height;
+        int scaledWidth = (int)(asteroidTexture.Width * scale);
+        int scaledHeight = (int)(asteroidTexture.Height * scale);
 
         return new Rectangle(
-            (int)(position.X - width / 2f),
-            (int)(position.Y - height / 2f),
-            width,
-            height
+            (int)(position.X - scaledWidth / 2f),
+            (int)(position.Y - scaledHeight / 2f),
+            scaledWidth,
+            scaledHeight
         );
     }
 
     public bool IsOffScreen(int screenWidth, int screenHeight)
     {
-        float halfWidth = asteroidTexture.Width / 2f;
-        float halfHeight = asteroidTexture.Height / 2f;
+        float scaledHalfWidth = (asteroidTexture.Width * scale) / 2f;
+        float scaledHalfHeight = (asteroidTexture.Height * scale) / 2f;
 
-        if (position.X + halfWidth < 0 ||
-            position.X - halfWidth > screenWidth ||
-            position.Y + halfHeight < 0 ||
-            position.Y - halfHeight > screenHeight)
+        if (position.X + scaledHalfWidth < 0 ||
+            position.X - scaledHalfWidth > screenWidth ||
+            position.Y + scaledHalfHeight < 0 ||
+            position.Y - scaledHalfHeight > screenHeight)
         {
             return true;
         }
         return false;
     }
-    
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using project7;
 
 namespace group_11_assignment7;
 
@@ -14,16 +15,20 @@ public class Game1 : Game
     
     private List<Asteroid> _asteroids;
     private List<Asteroid> _asteroidsToRemove = new List<Asteroid>();
+    private List<Projectile> _projectiles = new List<Projectile>();
+    private List<Projectile> _projectilesToRemove = new List<Projectile>();
     private Random _random;
     private float _asteroidSpawnTimer;
     private float _asteroidSpawnInterval = 2.5f;
     
     private float _levelTimer;
     private int _currentLevel = 1;
+    private int _score = 0;
     private const float LEVEL_DURATION = 20f;
 
     private Spaceship spaceship;
     private Texture2D _spaceshipTexture;
+    private Texture2D _projectileTexture;
     
     private Texture2D _heartTexture;
     private SpriteFont _font;
@@ -38,8 +43,7 @@ public class Game1 : Game
         
         _graphics.PreferredBackBufferWidth = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Width;
         _graphics.PreferredBackBufferHeight = GraphicsAdapter.DefaultAdapter.CurrentDisplayMode.Height;
-        _graphics.IsFullScreen = false;
-        Window.IsBorderless = true;
+        _graphics.IsFullScreen = true;
     }
 
     protected override void Initialize()
@@ -59,10 +63,13 @@ public class Game1 : Game
         _spaceshipTexture = Content.Load<Texture2D>("textures/spaceshipTexture");
         _heartTexture = Content.Load<Texture2D>("textures/heart");
         _font = Content.Load<SpriteFont>("fonts/GameFont");
+        
+        // Create a simple projectile texture
+        _projectileTexture = new Texture2D(GraphicsDevice, 1, 1);
+        _projectileTexture.SetData(new[] { Color.Yellow });
+        
         spaceship = new Spaceship(_spaceshipTexture, new Vector2(_spaceshipTexture.Width / 2f, _spaceshipTexture.Height / 2f), 5f);
     }
-
-
 
     protected override void Update(GameTime gameTime)
     {
@@ -79,10 +86,16 @@ public class Game1 : Game
 
         spaceship.Update(gameTime, k, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
         
+        // Handle shooting
+        if (k.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space))
+        {
+            spaceship.Shoot(_projectiles, _projectileTexture, gameTime);
+        }
+        _previousKeyboardState = k;
+        
         if (spaceship.GetLives() <= 0)
         {
             _gameOver = true;
-            _previousKeyboardState = k;
             return;
         }
 
@@ -103,6 +116,7 @@ public class Game1 : Game
             SpawnAsteroid();
         }
         
+        // Update asteroids
         for (int i = _asteroids.Count - 1; i >= 0; i--)
         {
             _asteroids[i].Update(gameTime);
@@ -114,6 +128,18 @@ public class Game1 : Game
             }
         }
 
+        // Update projectiles
+        for (int i = _projectiles.Count - 1; i >= 0; i--)
+        {
+            _projectiles[i].Update(gameTime);
+            
+            if (_projectiles[i].IsOffScreen(_graphics.PreferredBackBufferHeight))
+            {
+                _projectiles.RemoveAt(i);
+            }
+        }
+
+        // Check spaceship-asteroid collision
         foreach (var a in _asteroids)
         {
             if (spaceship.GetBounds().Intersects(a.GetBoundingBox()))
@@ -121,10 +147,32 @@ public class Game1 : Game
                 spaceship.LoseLife();
                 _asteroidsToRemove.Add(a);
             }
-        } 
+        }
+
+        // Check projectile-asteroid collision
+        foreach (var projectile in _projectiles)
+        {
+            foreach (var asteroid in _asteroids)
+            {
+                if (projectile.GetBounds().Intersects(asteroid.GetBoundingBox()))
+                {
+                    _projectilesToRemove.Add(projectile);
+                    if (asteroid.TakeDamage())
+                    {
+                        _asteroidsToRemove.Add(asteroid);
+                        _score += 10;
+                    }
+                    break;
+                }
+            }
+        }
         
         _asteroids.RemoveAll(a => _asteroidsToRemove.Contains(a));
         _asteroidsToRemove.Clear();
+        
+        _projectiles.RemoveAll(p => _projectilesToRemove.Contains(p));
+        _projectilesToRemove.Clear();
+        
         base.Update(gameTime);
     }
 
@@ -153,12 +201,18 @@ public class Game1 : Game
         if (!_gameOver)
         {
             spaceship.Draw(_spriteBatch);
+            
             foreach (var asteroid in _asteroids)
             {
                 asteroid.Draw(_spriteBatch);
             }
+            
+            foreach (var projectile in _projectiles)
+            {
+                projectile.Draw(_spriteBatch);
+            }
 
-            DrawHearts();
+            DrawHUD();
         }
         else
         {
@@ -170,19 +224,23 @@ public class Game1 : Game
         base.Draw(gameTime);
     }
 
-    private void DrawHearts()
+    private void DrawHUD()
     {
-        int heartSize = 30;
-        int heartSpacing = 40;
-        int startX = 20;
-        int startY = 20;
+        int screenWidth = _graphics.PreferredBackBufferWidth;
+        int screenHeight = _graphics.PreferredBackBufferHeight;
+        
+        // Draw hearts in top right corner - much larger and more visible
+        int heartSpacing = 50;
         int maxLives = 3;
         int currentLives = spaceship.GetLives();
         
+        // Start from further left to ensure they're visible
+        int startX = screenWidth - (maxLives * heartSpacing) - 40;
+        
         for (int i = 0; i < maxLives; i++)
         {
-            Vector2 position = new Vector2(startX + (i * heartSpacing), startY);
-            Color heartColor = i < currentLives ? Color.Red : Color.Gray;
+            Vector2 position = new Vector2(startX + (i * heartSpacing), 30);
+            Color heartColor = i < currentLives ? Color.Red : new Color(80, 80, 80);
             
             _spriteBatch.Draw(
                 _heartTexture,
@@ -191,11 +249,30 @@ public class Game1 : Game
                 heartColor,
                 0f,
                 Vector2.Zero,
-                1.5f,
+                2.0f,  // Much larger scale
                 SpriteEffects.None,
                 0f
             );
         }
+        
+        // Draw level and score in top left with background
+        string levelText = $"Level: {_currentLevel}";
+        string scoreText = $"Score: {_score}";
+        
+        Vector2 levelPos = new Vector2(20, 20);
+        Vector2 scorePos = new Vector2(20, 55);
+        
+        // Draw semi-transparent background for better visibility
+        Texture2D pixel = new Texture2D(GraphicsDevice, 1, 1);
+        pixel.SetData(new[] { Color.White });
+        
+        Vector2 levelSize = _font.MeasureString(levelText);
+        Vector2 scoreSize = _font.MeasureString(scoreText);
+        
+        _spriteBatch.Draw(pixel, new Rectangle(15, 15, (int)Math.Max(levelSize.X, scoreSize.X) + 10, 70), Color.Black * 0.5f);
+        
+        _spriteBatch.DrawString(_font, levelText, levelPos, Color.White);
+        _spriteBatch.DrawString(_font, scoreText, scorePos, Color.White);
     }
 
     private void DrawGameOverScreen()
@@ -226,5 +303,13 @@ public class Game1 : Game
             screenHeight / 2f - 20
         );
         _spriteBatch.DrawString(_font, levelText, levelPos, Color.White);
+        
+        string scoreText = $"Final Score: {_score}";
+        Vector2 scoreSize = _font.MeasureString(scoreText);
+        Vector2 scorePos = new Vector2(
+            (screenWidth - scoreSize.X) / 2f,
+            screenHeight / 2f + 20
+        );
+        _spriteBatch.DrawString(_font, scoreText, scorePos, Color.White);
     }
 }

@@ -11,7 +11,9 @@ namespace project7
         public Vector2 position;
         private Vector2 velocity;
         private Texture2D texture;
-        private float scale = 0.5f;
+        private float scale = 2.5f;
+        private int width = 4;
+        private int height = 15;
 
         public Projectile(Texture2D texture, Vector2 position, Vector2 velocity)
         {
@@ -27,12 +29,16 @@ namespace project7
 
         public void Draw(SpriteBatch spriteBatch)
         {
-            spriteBatch.Draw(texture,position,null,Color.White,0f,Vector2.Zero,scale,SpriteEffects.None,0f);
+            spriteBatch.Draw(
+                texture,
+                new Rectangle((int)position.X, (int)position.Y, width, height),
+                Color.Yellow
+            );
         }
 
         public Rectangle GetBounds()
         {
-            return new Rectangle((int)position.X,(int)position.Y,(int)(texture.Width * scale),(int)(texture.Height * scale));
+            return new Rectangle((int)position.X, (int)position.Y, width, height);
         }
 
         public bool IsOffScreen(int height)
