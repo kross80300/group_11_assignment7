@@ -21,7 +21,7 @@ public class Asteroid
         velocity = vel;
         asteroidTexture = texture;
         rotationSpeed = rotSpeed;
-        hitPoints = 1;  // Changed from 3 to 1 for one-hit destruction
+        hitPoints = 1;
         rotationAngle = 0f;
     }
 

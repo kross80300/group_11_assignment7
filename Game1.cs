@@ -30,7 +30,6 @@ public class Game1 : Game
     private Texture2D _spaceshipTexture;
     private Texture2D _projectileTexture;
     
-    private Texture2D _heartTexture;
     private SpriteFont _font;
     private bool _gameOver = false;
     private KeyboardState _previousKeyboardState;
@@ -61,10 +60,8 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _asteroidTexture = Content.Load<Texture2D>("textures/asteroid");
         _spaceshipTexture = Content.Load<Texture2D>("textures/spaceshipTexture");
-        _heartTexture = Content.Load<Texture2D>("textures/heart");
         _font = Content.Load<SpriteFont>("fonts/GameFont");
-        
-        // Create a simple projectile texture
+
         _projectileTexture = new Texture2D(GraphicsDevice, 1, 1);
         _projectileTexture.SetData(new[] { Color.Yellow });
         
@@ -86,7 +83,6 @@ public class Game1 : Game
 
         spaceship.Update(gameTime, k, _graphics.PreferredBackBufferWidth, _graphics.PreferredBackBufferHeight);
         
-        // Handle shooting
         if (k.IsKeyDown(Keys.Space) && !_previousKeyboardState.IsKeyDown(Keys.Space))
         {
             spaceship.Shoot(_projectiles, _projectileTexture, gameTime);
@@ -115,8 +111,7 @@ public class Game1 : Game
             _asteroidSpawnTimer = 0f;
             SpawnAsteroid();
         }
-        
-        // Update asteroids
+
         for (int i = _asteroids.Count - 1; i >= 0; i--)
         {
             _asteroids[i].Update(gameTime);
@@ -128,7 +123,6 @@ public class Game1 : Game
             }
         }
 
-        // Update projectiles
         for (int i = _projectiles.Count - 1; i >= 0; i--)
         {
             _projectiles[i].Update(gameTime);
@@ -139,7 +133,6 @@ public class Game1 : Game
             }
         }
 
-        // Check spaceship-asteroid collision
         foreach (var a in _asteroids)
         {
             if (spaceship.GetBounds().Intersects(a.GetBoundingBox()))
@@ -149,7 +142,6 @@ public class Game1 : Game
             }
         }
 
-        // Check projectile-asteroid collision
         foreach (var projectile in _projectiles)
         {
             foreach (var asteroid in _asteroids)
@@ -228,51 +220,29 @@ public class Game1 : Game
     {
         int screenWidth = _graphics.PreferredBackBufferWidth;
         int screenHeight = _graphics.PreferredBackBufferHeight;
-        
-        // Draw hearts in top right corner - much larger and more visible
-        int heartSpacing = 50;
-        int maxLives = 3;
-        int currentLives = spaceship.GetLives();
-        
-        // Start from further left to ensure they're visible
-        int startX = screenWidth - (maxLives * heartSpacing) - 40;
-        
-        for (int i = 0; i < maxLives; i++)
-        {
-            Vector2 position = new Vector2(startX + (i * heartSpacing), 30);
-            Color heartColor = i < currentLives ? Color.Red : new Color(80, 80, 80);
-            
-            _spriteBatch.Draw(
-                _heartTexture,
-                position,
-                null,
-                heartColor,
-                0f,
-                Vector2.Zero,
-                2.0f,  // Much larger scale
-                SpriteEffects.None,
-                0f
-            );
-        }
-        
-        // Draw level and score in top left with background
+
         string levelText = $"Level: {_currentLevel}";
         string scoreText = $"Score: {_score}";
+        string livesText = $"Lives: {spaceship.GetLives()}";
         
         Vector2 levelPos = new Vector2(20, 20);
         Vector2 scorePos = new Vector2(20, 55);
-        
-        // Draw semi-transparent background for better visibility
+        Vector2 livesPos = new Vector2(20, 90);
+
         Texture2D pixel = new Texture2D(GraphicsDevice, 1, 1);
         pixel.SetData(new[] { Color.White });
         
         Vector2 levelSize = _font.MeasureString(levelText);
         Vector2 scoreSize = _font.MeasureString(scoreText);
+        Vector2 livesSize = _font.MeasureString(livesText);
         
-        _spriteBatch.Draw(pixel, new Rectangle(15, 15, (int)Math.Max(levelSize.X, scoreSize.X) + 10, 70), Color.Black * 0.5f);
+        float maxWidth = Math.Max(Math.Max(levelSize.X, scoreSize.X), livesSize.X);
+        
+        _spriteBatch.Draw(pixel, new Rectangle(15, 15, (int)maxWidth + 10, 105), Color.Black * 0.5f);
         
         _spriteBatch.DrawString(_font, levelText, levelPos, Color.White);
         _spriteBatch.DrawString(_font, scoreText, scorePos, Color.White);
+        _spriteBatch.DrawString(_font, livesText, livesPos, Color.White);
     }
 
     private void DrawGameOverScreen()
