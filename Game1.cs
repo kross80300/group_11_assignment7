@@ -24,6 +24,11 @@ public class Game1 : Game
 
     private Spaceship spaceship;
     private Texture2D _spaceshipTexture;
+    
+    private Texture2D _heartTexture;
+    private SpriteFont _font;
+    private bool _gameOver = false;
+    private KeyboardState _previousKeyboardState;
 
     public Game1()
     {
@@ -52,6 +57,8 @@ public class Game1 : Game
         _spriteBatch = new SpriteBatch(GraphicsDevice);
         _asteroidTexture = Content.Load<Texture2D>("textures/asteroid");
         _spaceshipTexture = Content.Load<Texture2D>("textures/spaceshipTexture");
+        _heartTexture = Content.Load<Texture2D>("textures/heart");
+        _font = Content.Load<SpriteFont>("Fonts/GameFont");
         spaceship = new Spaceship(_spaceshipTexture, new Vector2(_spaceshipTexture.Width / 2f, _spaceshipTexture.Height / 2f), 5f);
     }
 
