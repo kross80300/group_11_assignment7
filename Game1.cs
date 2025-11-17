@@ -58,7 +58,7 @@ public class Game1 : Game
         _asteroidTexture = Content.Load<Texture2D>("textures/asteroid");
         _spaceshipTexture = Content.Load<Texture2D>("textures/spaceshipTexture");
         _heartTexture = Content.Load<Texture2D>("textures/heart");
-        _font = Content.Load<SpriteFont>("Fonts/GameFont");
+        _font = Content.Load<SpriteFont>("fonts/GameFont");
         spaceship = new Spaceship(_spaceshipTexture, new Vector2(_spaceshipTexture.Width / 2f, _spaceshipTexture.Height / 2f), 5f);
     }
 
